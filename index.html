@@ -92,6 +92,16 @@
 
     var id = document.getElementById("drawflow");
     const editor = new Drawflow(id);
+    editor.zoom_enter = function(event, delta) {
+        event.preventDefault()
+        if(event.deltaY > 0) {
+            // Zoom Out
+            this.zoom_out();
+        } else {
+            // Zoom In
+            this.zoom_in();
+        }
+    }
     editor.reroute = true;
     editor.reroute_fix_curvature = true;
     editor.force_first_input = false;
