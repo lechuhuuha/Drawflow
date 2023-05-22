@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/jerosoler/Drawflow/dist/drawflow.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/gh/jerosoler/Drawflow/dist/drawflow.min.js"></script>
+    <style>
+      #drawflow {
+        position: relative;
+        width: 100%;
+        height: 800px;
+        border: 1px solid red;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <div id="drawflow"></div>
+      <button onclick="undo()">Undo</button>
+      <button onclick="redo()">Redo</button>
+    </div>
+
+    <script>
+      var id = document.getElementById("drawflow");
+      const editor = new Drawflow(id);
+
+      const history = [];
+      let historyStatus = null;
+      let historyActive = false;
+      let historyStop = false;
+
+      function undo() {
+        if (historyStatus == 1) {
+          return;
+        }
+        if (historyStatus === null) {
+          historyStatus = history.length;
+        }
+        if (historyStatus === history.length) {
+          historyActive = true;
+          history.push(editor.export());
+          history.splice(-1); // Fix editor export two events;
+        }
+        historyStatus = historyStatus - 1;
+        historyActive = true;
+        editor.import(JSON.parse(history[historyStatus]));
+        editor.drawflow = new Proxy(editor.drawflow, handler);
+      }
+
+      function redo() {
+        if (historyStatus !== null && historyStatus < history.length - 1) {
+          historyStatus = historyStatus + 1;
+          historyActive = true;
+          editor.import(JSON.parse(history[historyStatus]));
+          editor.drawflow = new Proxy(editor.drawflow, handler);
+        }
+      }
+
+      editor.on("click", () => {
+        historyStop = true;
+      });
+
+      editor.on("mouseUp", () => {
+        historyStop = false;
+        historyActive = true;
+        history.push(editor.export());
+        history.splice(-1);
+        if (history.at(-2) === history.at(-1)) {
+          console.log("delete");
+          history.splice(-1);
+        } else {
+          /// ??? DELETE History at restore point????
+          historyStatus = history.length - 1;
+        }
+      });
+
+      const handler = {
+        get: function (target, property, receiver) {
+          console.log(JSON.stringify(target));
+          if (!historyActive && !historyStop) {
+            history.push(JSON.stringify(target));
+          }
+          historyActive = false;
+          return Reflect.get(...arguments);
+        },
+      };
+      editor.drawflow = new Proxy(editor.drawflow, handler);
+
+      editor.start();
+      history.splice(-2); // Fix history
+
+      editor.addNode("aaa", 0, 1, 100, 300, "aaa", {}, "aaa");
+      editor.addNode("bbb", 1, 0, 200, 400, "bbb", {}, "bbb");
+      editor.addNode("ccc", 1, 0, 500, 500, "ccc", {}, "ccc");
+    </script>
+  </body>
+</html>

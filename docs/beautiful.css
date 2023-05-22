@@ -362,3 +362,25 @@ cursor: pointer;
     width: 80%;
   }
 }
+
+.drawflow .drawflow-node {
+  display: block;
+}
+
+.drawflow .drawflow-node .inputs, .drawflow .drawflow-node .outputs {
+  display: flex;
+  width: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.drawflow .drawflow-node .input {
+  top: -10px;
+  left: 0px;
+}
+
+.drawflow .drawflow-node .output {
+  top: 10px;
+  right: 0px;
+}

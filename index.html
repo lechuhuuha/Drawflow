@@ -7,7 +7,7 @@
   <title>Drawflow</title>
 </head>
 <body>
-  <script src="drawflow.min.js"></script>
+  <script src="dist/drawflow.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js" integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs=" crossorigin="anonymous"></script>
   <link rel="stylesheet" type="text/css" href="src/drawflow.css" />
   <link rel="stylesheet" type="text/css" href="docs/beautiful.css" />
@@ -445,6 +445,20 @@
 
     }
 
+    editor.createCurvature = function (start_x, start_y, end_x, end_y, curvature_value, type) {
+      var center_y = ((end_y - start_y) / 2) + start_y;
+      var default_round_radius = 10;
+      var round_radius = Math.min(default_round_radius, Math.abs(start_x - end_x), Math.abs(start_y - end_y));
+      
+      var isRight = end_x > start_x;
+      var isDown = end_y > start_y;
+      return `M ${start_x} ${start_y} 
+            L ${start_x} ${isDown ? center_y - round_radius : center_y + round_radius} 
+            A ${round_radius} ${round_radius} 0 0 ${isRight ^ !isDown ? 0 : 1} ${isRight ? start_x + round_radius : start_x - round_radius} ${center_y}
+            L ${isRight ? end_x - round_radius : end_x + round_radius} ${center_y}
+            A ${round_radius} ${round_radius} 0 0 ${isRight ^ !isDown ? 1 : 0} ${end_x} ${isDown ? center_y + round_radius : center_y - round_radius}
+            L ${end_x} ${end_y}`;
+    }
   </script>
 </body>
 </html>
